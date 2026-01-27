@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "decok.dfcdvadstf.difficultyLocker.mixin",
+  "refmap": "${mixin_refmap}"
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinGuiOptions"
+  ]
+}
