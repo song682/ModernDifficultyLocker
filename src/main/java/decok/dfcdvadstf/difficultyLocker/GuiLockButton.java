@@ -17,6 +17,10 @@ public class GuiLockButton extends GuiButton {
         this.locked = locked;
     }
 
+    public boolean isLocked() {
+        return locked;
+    }
+
     @Override
     public void drawButton(Minecraft mc, int mouseX, int mouseY){
         if (!this.visible) return;
@@ -24,7 +28,7 @@ public class GuiLockButton extends GuiButton {
         boolean hovered = mouseX >= this.xPosition && mouseX < this.xPosition + this.width &&
                 mouseY >= this.yPosition && mouseY < this.yPosition + this.height;
 
-        int col = locked? 0 : 20;
+        int col = locked ? 0 : 20;
         int row;
 
         if (!this.enabled) row = 40;
