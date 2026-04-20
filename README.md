@@ -1,1 +1,5 @@
-# Example Mod Skeleton for Minecraft Forge 1.7.10
+# ModernDifficultyLocker
+
+>  Fork you, DifficultyLocker.
+
+A respectful fork without [the "credit me before stealing" attitude](https://github.com/Matts/Difficulty-Locker#difficuly-locker-source-).
