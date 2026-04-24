@@ -1,16 +1,25 @@
-[
-    {
-      "modid": "${modid}",
-      "name": "${modname}",
-      "description": "${moddescription}",
-      "version": "${modversion}",
-      "mcversion": "${mcversion}",
-      "url": "",
-      "updateUrl": "",
-      "authorList": ["Someoneice"],
-      "credits": "Someoneice",
-      "logoFile": "",
-      "screenshots": [],
-      "dependencies": []
-    }
-]
+{
+	"modListVersion": 2,
+	"modList": [{
+		"modid": "${modid}",
+		"name": "${modname}",
+		"description": "${moddescription}",
+		"version": "${modversion}",
+		"mcversion": "${mcversion}",
+		"url": "${url}",
+		"updateUrl": "",
+		"authorList": ${authorList},
+		"credits": "",
+		"logoFile": "${logo}",
+		"screenshots": [],
+		"parent": "",
+		"requiredMods": [],
+		"dependencies": ${dependencies},
+		"dependants": [],
+		"useDependencyInformation": false,
+		"mixins": {
+			"client": "mixins.${modid}.json",
+			"common": "mixins.${modid}.json"
+		}
+	}]
+}

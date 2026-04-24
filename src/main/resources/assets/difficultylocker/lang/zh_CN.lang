@@ -1,0 +1,8 @@
+difficultylocker.button.lockDifficulty=锁定难度
+difficultylocker.button.locked=已锁定
+difficultylocker.button.unlocked=未锁定
+difficultylocker.worldsettings.title=世界设置
+difficultylocker.worldsettings.button=世界设置...
+difficultylocker.gamerules.tooltip.needCreative=需要创造模式
+difficultylocker.gamerules.tooltip.needCheats=需要启用作弊
+difficultylocker.gamerules.tooltip.needCreativeAndCheats=需要创造模式且启用作弊

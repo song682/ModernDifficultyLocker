@@ -1,5 +1,6 @@
 package decok.dfcdvadstf.difficultyLocker;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -18,6 +19,19 @@ public class DifficultyLocker {
     
     public static final Logger LOGGER = LogManager.getLogger(Tags.NAME);
     public static DifficultyLockerConfig config;
+
+    private static Boolean createWorldUILoaded = null;
+
+    /**
+     * 检测 CreateWorldUI 模组是否已加载（结果会被缓存）
+     */
+    public static boolean isCreateWorldUILoaded() {
+        if (createWorldUILoaded == null) {
+            createWorldUILoaded = Loader.isModLoaded("createworldui");
+            LOGGER.info("CreateWorldUI mod loaded: {}", createWorldUILoaded);
+        }
+        return createWorldUILoaded;
+    }
     
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {

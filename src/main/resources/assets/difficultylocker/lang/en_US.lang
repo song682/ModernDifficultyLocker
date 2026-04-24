@@ -1,0 +1,12 @@
+difficulty.lock.confirm.title=Lock World Difficulty
+difficulty.lock.confirm.line=Are you sure you want to lock the difficulty of this world? This will set this world to always be %s, and you will
+difficulty.unlock.confirm.title=Unlock World Difficulty
+difficulty.unlock.confirm.line=Are you sure you want to unlock the difficulty of this world? This will set this world to change be %s, and you will
+difficultylocker.button.lockDifficulty=Lock Difficulty
+difficultylocker.button.locked=Locked
+difficultylocker.button.unlocked=Unlocked
+difficultylocker.worldsettings.title=World Settings
+difficultylocker.worldsettings.button=World Settings...
+difficultylocker.gamerules.tooltip.needCreative=Requires Creative mode
+difficultylocker.gamerules.tooltip.needCheats=Requires Cheats to be enabled
+difficultylocker.gamerules.tooltip.needCreativeAndCheats=Requires Creative mode and Cheats to be enabled
