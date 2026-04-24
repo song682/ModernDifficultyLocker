@@ -1,10 +1,17 @@
 {
-  "required": true,
-  "minVersion": "0.8.5",
-  "package": "decok.dfcdvadstf.difficultyLocker.mixin",
-  "refmap": "${mixin_refmap}"
-  "compatibilityLevel": "JAVA_8",
-  "mixins": [
-    "MixinGuiOptions"
-  ]
+    "required": true,
+    "minVersion": "0.7.11",
+    "package": "decok.dfcdvadstf.difficultyLocker.mixin",
+    "refmap": "mixins.difficultylocker.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "MixinIntegratedServer"
+    ],
+    "client": [
+        "MixinGuiOptions"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }

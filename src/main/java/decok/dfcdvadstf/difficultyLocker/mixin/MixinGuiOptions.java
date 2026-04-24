@@ -2,6 +2,7 @@ package decok.dfcdvadstf.difficultyLocker.mixin;
 
 import decok.dfcdvadstf.difficultyLocker.DifficultyLocker;
 import decok.dfcdvadstf.difficultyLocker.GuiLockButton;
+import decok.dfcdvadstf.difficultyLocker.GuiWorldSettings;
 import decok.dfcdvadstf.difficultyLocker.WorldDifficultyData;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.*;
@@ -28,9 +29,14 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
     private static final int LOCK_BUTTON_ID = 5001;
 
     @Unique
+    private static final int WORLD_SETTINGS_BUTTON_ID = 5005;
+
+    @Unique
     private GuiButton difficultyLocker$difficultyButton;
     @Unique
     private GuiLockButton difficultyLocker$lockButton;
+    @Unique
+    private GuiButton difficultyLocker$worldSettingsButton;
     @Unique
     private boolean difficultyLocker$pendingLockState = false;
 
@@ -41,7 +47,7 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             return;
         }
 
-        // Find difficulty button
+        // 查找难度按钮
         for (GuiButton b : (List<GuiButton>) this.buttonList) {
             if (b.id == GameSettings.Options.DIFFICULTY.returnEnumOrdinal()) {
                 this.difficultyLocker$difficultyButton = b;
@@ -51,30 +57,42 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
 
         if (difficultyLocker$difficultyButton == null) return;
 
-        // 从 WorldDifficultyData 获取当前世界的锁定状态（支持存档持久化）
-        WorldDifficultyData data = WorldDifficultyData.getInstance();
-        boolean isLocked = data.isLocked();
+        // ===== 检测 CreateWorldUI 是否加载 =====
+        if (DifficultyLocker.isCreateWorldUILoaded()) {
+            // 双模组模式：隐藏难度按钮，显示 "World Settings..." 按钮
+            difficultyLocker$difficultyButton.visible = false;
+            difficultyLocker$difficultyButton.enabled = false;
 
-        // Resize difficulty button to make room for lock button
-        int originalWidth = difficultyLocker$difficultyButton.width; // 150
-        int lockWidth = 20;
-        int newWidth = originalWidth - lockWidth - 2; // 2px gap
+            difficultyLocker$worldSettingsButton = new GuiButton(
+                WORLD_SETTINGS_BUTTON_ID,
+                difficultyLocker$difficultyButton.xPosition,
+                difficultyLocker$difficultyButton.yPosition,
+                150, 20,
+                I18n.format("difficultylocker.worldsettings.button")
+            );
+            this.buttonList.add(difficultyLocker$worldSettingsButton);
+        } else {
+            // 原始模式：难度按钮 + 锁定按钮
+            WorldDifficultyData data = WorldDifficultyData.getInstance();
+            boolean isLocked = data.isLocked();
 
-        difficultyLocker$difficultyButton.width = newWidth;
+            int originalWidth = difficultyLocker$difficultyButton.width;
+            int lockWidth = 20;
+            int newWidth = originalWidth - lockWidth - 2;
 
-        // Add lock button next to difficulty button
-        int x = difficultyLocker$difficultyButton.xPosition + newWidth + 2;
-        int y = difficultyLocker$difficultyButton.yPosition;
+            difficultyLocker$difficultyButton.width = newWidth;
 
-        difficultyLocker$lockButton = new GuiLockButton(LOCK_BUTTON_ID, x, y, isLocked);
-        this.buttonList.add(difficultyLocker$lockButton);
+            int x = difficultyLocker$difficultyButton.xPosition + newWidth + 2;
+            int y = difficultyLocker$difficultyButton.yPosition;
 
-        // 根据锁定状态设置难度按钮是否可用
-        difficultyLocker$difficultyButton.enabled = !isLocked;
+            difficultyLocker$lockButton = new GuiLockButton(LOCK_BUTTON_ID, x, y, isLocked);
+            this.buttonList.add(difficultyLocker$lockButton);
 
-        // 如果已锁定且不允许解锁，禁用锁按钮
-        if (isLocked && !DifficultyLocker.config.allowUnlock) {
-            difficultyLocker$lockButton.enabled = false;
+            difficultyLocker$difficultyButton.enabled = !isLocked;
+
+            if (isLocked && !DifficultyLocker.config.allowUnlock) {
+                difficultyLocker$lockButton.enabled = false;
+            }
         }
     }
 
@@ -85,11 +103,21 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             return;
         }
 
+        // World Settings 按钮点击 → 打开 GuiWorldSettings
+        if (button.id == WORLD_SETTINGS_BUTTON_ID && button.enabled) {
+            try {
+                mc.displayGuiScreen(new GuiWorldSettings((GuiOptions)(Object)this, this.field_146443_h));
+            } catch (NoClassDefFoundError e) {
+                DifficultyLocker.LOGGER.warn("CreateWorldUI classes not available: {}", e.getMessage());
+            }
+            return;
+        }
+
+        // 原始锁定按钮逻辑
         if (button.id == LOCK_BUTTON_ID && button.enabled) {
             WorldDifficultyData data = WorldDifficultyData.getInstance();
             boolean currentLocked = data.isLocked();
 
-            // 如果当前未锁定，进行锁定操作（需要确认）
             if (!currentLocked) {
                 difficultyLocker$pendingLockState = true;
                 this.mc.displayGuiScreen(new GuiYesNo(this, 
@@ -97,7 +125,6 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
                     I18n.format("difficulty.lock.confirm.line", I18n.format(mc.gameSettings.difficulty.getDifficultyResourceKey())), 
                     1001));
             }
-            // 如果当前已锁定且允许解锁，进行解锁操作（需要确认）
             else if (DifficultyLocker.config.allowUnlock) {
                 difficultyLocker$pendingLockState = false;
                 this.mc.displayGuiScreen(new GuiYesNo(this, 
@@ -120,39 +147,31 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
         // 锁定确认对话框 (id=1001)
         if (id == 1001) {
             if (confirmed) {
-                // 用户确认锁定，保存锁定状态到存档
                 data.setLocked(true);
                 data.setLockedDifficulty(mc.gameSettings.difficulty);
                 
-                // 保存到文件
                 if (mc.getIntegratedServer() != null) {
                     data.saveWorldData(mc.getIntegratedServer().getActiveAnvilConverter()
                         .getSaveLoader(mc.getIntegratedServer().getFolderName(), false));
                 }
 
-                // 禁用难度按钮
                 if (difficultyLocker$difficultyButton != null) {
                     difficultyLocker$difficultyButton.enabled = false;
                 }
 
-                // 更新锁按钮纹理
                 if (difficultyLocker$lockButton != null) {
                     difficultyLocker$lockButton.setLocked(true);
-
-                    // 如果默认不允许解锁，锁定后禁用锁按钮
                     if (!DifficultyLocker.config.allowUnlock) {
                         difficultyLocker$lockButton.enabled = false;
                     }
                 }
 
-                // 播放点击声音
                 if (mc != null && mc.getSoundHandler() != null) {
                     mc.getSoundHandler().playSound(
                             PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F)
                     );
                 }
             }
-            // 返回设置界面
             if (mc != null) {
                 mc.displayGuiScreen(this);
             }
@@ -160,34 +179,28 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
         // 解锁确认对话框 (id=1002)
         else if (id == 1002) {
             if (confirmed) {
-                // 用户确认解锁，保存解锁状态
                 data.setLocked(false);
                 
-                // 保存到文件
                 if (mc.getIntegratedServer() != null) {
                     data.saveWorldData(mc.getIntegratedServer().getActiveAnvilConverter()
                         .getSaveLoader(mc.getIntegratedServer().getFolderName(), false));
                 }
 
-                // 启用难度按钮
                 if (difficultyLocker$difficultyButton != null) {
                     difficultyLocker$difficultyButton.enabled = true;
                 }
 
-                // 更新锁按钮纹理
                 if (difficultyLocker$lockButton != null) {
                     difficultyLocker$lockButton.setLocked(false);
-                    difficultyLocker$lockButton.enabled = true; // 确保锁按钮可用
+                    difficultyLocker$lockButton.enabled = true;
                 }
 
-                // 播放点击声音
                 if (mc != null && mc.getSoundHandler() != null) {
                     mc.getSoundHandler().playSound(
                             PositionedSoundRecord.func_147674_a(new ResourceLocation("gui.button.press"), 1.0F)
                     );
                 }
             }
-            // 返回设置界面
             if (mc != null) {
                 mc.displayGuiScreen(this);
             }
@@ -196,12 +209,20 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
 
     @Inject(method = "drawScreen", at = @At("TAIL"))
     private void hideLockButtonIfNotInSinglePlayer(int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        // 检查是否在单人世界中，如果不在，隐藏锁按钮
-        if (difficultyLocker$lockButton != null) {
-            boolean isSinglePlayer = this.mc.theWorld != null && this.mc.isIntegratedServerRunning();
-            difficultyLocker$lockButton.visible = isSinglePlayer;
+        boolean isSinglePlayer = this.mc.theWorld != null && this.mc.isIntegratedServerRunning();
 
-            // 如果不在单人世界，也恢复难度按钮的原始宽度
+        // 处理 World Settings 按钮可见性
+        if (difficultyLocker$worldSettingsButton != null) {
+            difficultyLocker$worldSettingsButton.visible = isSinglePlayer;
+            // 确保 World Settings 模式下难度按钮也保持隐藏
+            if (difficultyLocker$difficultyButton != null && isSinglePlayer && DifficultyLocker.isCreateWorldUILoaded()) {
+                difficultyLocker$difficultyButton.visible = false;
+            }
+        }
+
+        // 处理原始锁定按钮可见性
+        if (difficultyLocker$lockButton != null) {
+            difficultyLocker$lockButton.visible = isSinglePlayer;
             if (!isSinglePlayer && difficultyLocker$difficultyButton != null) {
                 difficultyLocker$difficultyButton.width = 150;
             }
