@@ -1,5 +1,6 @@
 package decok.dfcdvadstf.difficultyLocker;
 
+import cpw.mods.fml.common.Optional;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleApplier;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleMonitorNSetter;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleMonitorNSetter.GameruleValue;
@@ -158,7 +159,10 @@ public class GuiWorldSettings extends GuiScreen implements GuiYesNoCallback {
     /**
      * 打开 CreateWorldUI 的 GameRuleEditor
      * 传入当前世界的游戏规则作为可编辑数据
+     *
+     * 当 createworldui 模组未加载时，Forge 会自动剥离此方法（变为空操作）
      */
+    @Optional.Method(modid = "createworldui")
     private void openGameRuleEditor() {
         Map<String, String> currentRules = new HashMap<>();
         if (mc.theWorld != null) {
@@ -229,7 +233,10 @@ public class GuiWorldSettings extends GuiScreen implements GuiYesNoCallback {
      * 将 GameRuleEditor 保存的待应用规则直接应用到当前运行的世界
      * （GameRuleEditor 默认使用 GameRuleApplier.setPendingGameRules，
      *  该机制设计为世界加载时生效，但已在运行的世界需要直接应用）
+     *
+     * 当 createworldui 模组未加载时，Forge 会自动剥离此方法（变为空操作）
      */
+    @Optional.Method(modid = "createworldui")
     private void applyPendingGameRules() {
         try {
             Map<String, String> pending = GameRuleApplier.getPendingGameRules();
