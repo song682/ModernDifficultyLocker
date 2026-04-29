@@ -1,7 +1,7 @@
 difficulty.lock.confirm.title=Lock World Difficulty
-difficulty.lock.confirm.line=Are you sure you want to lock the difficulty of this world? This will set this world to always be %s, and you will
+difficulty.lock.confirm.line=Are you sure you want to lock the difficulty of this world? This will set this world to always be %s, and you will never be able to change that again.
 difficulty.unlock.confirm.title=Unlock World Difficulty
-difficulty.unlock.confirm.line=Are you sure you want to unlock the difficulty of this world? This will set this world to change be %s, and you will
+difficulty.unlock.confirm.line=Are you sure you want to unlock the difficulty of this world? This will set this world to change.
 difficultylocker.button.lockDifficulty=Lock Difficulty
 difficultylocker.button.locked=Locked
 difficultylocker.button.unlocked=Unlocked

@@ -1,4 +1,6 @@
 difficultylocker.button.lockDifficulty=锁定难度
+difficulty.lock.confirm.title=锁定世界难度
+difficulty.lock.confirm.line=你确定你要锁定这个世界的难度吗? 这会将这个世界的难度锁定为%s, 并且永远无法再次更改难度。
 difficultylocker.button.locked=已锁定
 difficultylocker.button.unlocked=未锁定
 difficultylocker.worldsettings.title=世界设置
