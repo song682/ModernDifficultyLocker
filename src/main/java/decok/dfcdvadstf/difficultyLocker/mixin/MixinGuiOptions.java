@@ -80,6 +80,18 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             // 原始模式：难度按钮 + 锁定按钮
             WorldDifficultyData data = WorldDifficultyData.getInstance();
             boolean isLocked = data.isLocked();
+            boolean isHardcore = mc.theWorld.getWorldInfo().isHardcoreModeEnabled();
+
+            // 如果是HardCore模式，确保锁定状态
+            if (isHardcore && !isLocked) {
+                data.setHardcoreMode(true);
+                isLocked = true;
+                // 保存HardCore模式的锁定状态
+                if (mc.getIntegratedServer() != null) {
+                    data.saveWorldData(mc.getIntegratedServer().getActiveAnvilConverter()
+                        .getSaveLoader(mc.getIntegratedServer().getFolderName(), false));
+                }
+            }
 
             int originalWidth = difficultyLocker$difficultyButton.width;
             int lockWidth = 20;
@@ -93,9 +105,15 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             difficultyLocker$lockButton = new GuiLockButton(LOCK_BUTTON_ID, x, y, isLocked);
             this.buttonList.add(difficultyLocker$lockButton);
 
+            // HardCore模式或锁定时禁用难度按钮
             difficultyLocker$difficultyButton.enabled = !isLocked;
 
             if (isLocked && !DifficultyLocker.config.allowUnlock) {
+                difficultyLocker$lockButton.enabled = false;
+            }
+            
+            // HardCore模式下，锁定按钮不可用（不能解锁）
+            if (isHardcore) {
                 difficultyLocker$lockButton.enabled = false;
             }
         }
@@ -120,6 +138,12 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
         if (button.id == LOCK_BUTTON_ID && button.enabled) {
             WorldDifficultyData data = WorldDifficultyData.getInstance();
             boolean currentLocked = data.isLocked();
+            boolean isHardcore = mc.theWorld.getWorldInfo().isHardcoreModeEnabled();
+
+            // HardCore模式下不允许解锁
+            if (isHardcore && currentLocked) {
+                return;
+            }
 
             if (!currentLocked) {
                 difficultyLocker$pendingLockState = true;

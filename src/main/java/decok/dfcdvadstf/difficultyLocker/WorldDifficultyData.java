@@ -28,6 +28,9 @@ public class WorldDifficultyData {
     // 单例实例
     private static WorldDifficultyData instance;
     
+    // 标记是否为HardCore模式
+    private boolean isHardcoreMode = false;
+    
     public static WorldDifficultyData getInstance() {
         if (instance == null) {
             instance = new WorldDifficultyData();
@@ -41,7 +44,8 @@ public class WorldDifficultyData {
     public void loadWorldData(ISaveHandler saveHandler, String worldName) {
         this.currentWorldName = worldName;
         this.locked = false;
-        this.lockedDifficulty = 2;
+        this.lockedDifficulty = 2; // 默认普通难度
+        this.isHardcoreMode = false;
         
         if (saveHandler == null) {
             LOGGER.warn("SaveHandler is null, cannot load difficulty data");
@@ -56,8 +60,9 @@ public class WorldDifficultyData {
                 NBTTagCompound nbt = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
                 this.locked = nbt.getBoolean("Locked");
                 this.lockedDifficulty = nbt.getInteger("LockedDifficulty");
-                LOGGER.info("Loaded difficulty data for world '{}': locked={}, difficulty={}", 
-                    worldName, locked, lockedDifficulty);
+                this.isHardcoreMode = nbt.getBoolean("IsHardcoreMode"); // 读取HardCore标记
+                LOGGER.info("Loaded difficulty data for world '{}': locked={}, difficulty={}, hardcore={}", 
+                    worldName, locked, lockedDifficulty, isHardcoreMode);
             } else {
                 LOGGER.info("No difficulty data found for world '{}', using defaults", worldName);
             }
@@ -85,10 +90,11 @@ public class WorldDifficultyData {
             NBTTagCompound nbt = new NBTTagCompound();
             nbt.setBoolean("Locked", locked);
             nbt.setInteger("LockedDifficulty", lockedDifficulty);
+            nbt.setBoolean("IsHardcoreMode", isHardcoreMode); // 保存HardCore标记
             
             CompressedStreamTools.writeCompressed(nbt, new FileOutputStream(dataFile));
-            LOGGER.info("Saved difficulty data for world '{}': locked={}, difficulty={}", 
-                currentWorldName, locked, lockedDifficulty);
+            LOGGER.info("Saved difficulty data for world '{}': locked={}, difficulty={}, hardcore={}", 
+                currentWorldName, locked, lockedDifficulty, isHardcoreMode);
         } catch (IOException e) {
             LOGGER.error("Failed to save difficulty data for world '{}': {}", currentWorldName, e.getMessage());
         }
@@ -101,6 +107,7 @@ public class WorldDifficultyData {
         this.currentWorldName = "";
         this.locked = false;
         this.lockedDifficulty = 2;
+        this.isHardcoreMode = false;
     }
     
     // Getters and Setters
@@ -135,5 +142,25 @@ public class WorldDifficultyData {
     
     public String getCurrentWorldName() {
         return currentWorldName;
+    }
+    
+    /**
+     * 设置是否为HardCore模式
+     */
+    public void setHardcoreMode(boolean hardcoreMode) {
+        this.isHardcoreMode = hardcoreMode;
+        // 如果是HardCore模式，自动锁定为困难难度
+        if (hardcoreMode) {
+            this.locked = true;
+            this.lockedDifficulty = 3; // 困难难度
+            LOGGER.info("HardCore mode enabled, auto-locking to hard difficulty");
+        }
+    }
+    
+    /**
+     * 获取是否为HardCore模式
+     */
+    public boolean isHardcoreMode() {
+        return isHardcoreMode;
     }
 }

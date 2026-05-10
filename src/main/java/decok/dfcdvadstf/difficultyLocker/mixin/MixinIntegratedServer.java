@@ -68,9 +68,20 @@ public abstract class MixinIntegratedServer {
                                   String generatorOptions, CallbackInfo ci) {
 
         WorldDifficultyData data = WorldDifficultyData.getInstance();
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        
+        // 检测是否为HardCore模式
+        boolean isHardcore = server.worldServers != null && server.worldServers.length > 0 && 
+                            server.worldServers[0].getWorldInfo().isHardcoreModeEnabled();
+        
+        // 如果是HardCore模式，设置自动锁定
+        if (isHardcore) {
+            data.setHardcoreMode(true);
+            // 保存HardCore模式的锁定状态
+            data.saveWorldData(server.getActiveAnvilConverter().getSaveLoader(difficultyLocker$worldName, false));
+        }
 
         if (data.isLocked()) {
-            MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
             EnumDifficulty lockedDifficulty = data.getLockedDifficultyEnum();
 
             difficultyLocker$logger.info("Applying locked difficulty '{}' to world '{}'",

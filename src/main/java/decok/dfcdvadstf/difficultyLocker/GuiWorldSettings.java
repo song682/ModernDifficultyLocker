@@ -61,6 +61,14 @@ public class GuiWorldSettings extends GuiScreen implements GuiYesNoCallback {
         boolean isLocked = data.isLocked();
         boolean isHardcore = mc.theWorld != null && mc.theWorld.getWorldInfo().isHardcoreModeEnabled();
 
+        // 如果是HardCore模式，确保锁定状态
+        if (isHardcore && !isLocked) {
+            data.setHardcoreMode(true);
+            isLocked = true;
+            // 保存HardCore模式的锁定状态
+            saveWorldData();
+        }
+
         // === 难度按钮（左侧，缩小宽度给锁定按钮腾空间） ===
         int diffBtnX = this.width / 2 - 155;
         int diffBtnY = this.height / 6 - 12;
@@ -199,6 +207,13 @@ public class GuiWorldSettings extends GuiScreen implements GuiYesNoCallback {
         }
         // 解锁确认 (id=1002)
         else if (id == 1002) {
+            // HardCore模式下不允许解锁
+            boolean isHardcore = mc.theWorld != null && mc.theWorld.getWorldInfo().isHardcoreModeEnabled();
+            if (isHardcore) {
+                mc.displayGuiScreen(this);
+                return;
+            }
+            
             if (confirmed) {
                 data.setLocked(false);
                 saveWorldData();
