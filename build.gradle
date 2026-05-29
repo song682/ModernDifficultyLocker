@@ -77,6 +77,11 @@ repositories {
         name "Modrinth Maven"
         url "https://api.modrinth.com/maven"
     }
+
+    maven {
+        name "JitPack"
+        url "https://jitpack.io"
+    }
 }
 
 dependencies {
@@ -101,6 +106,8 @@ dependencies {
         implementation "maven.modrinth:codechickencore-unofficial:${project.cc_version}"
         implementation "maven.modrinth:codechickenlib-unofficial:${project.cc_version}"
     }
+
+    implementation "com.github.song682:CreateWorldUI:5.1.1"
 
     implementation fileTree(dir: 'lib', includes: ['*.jar'])
 }
