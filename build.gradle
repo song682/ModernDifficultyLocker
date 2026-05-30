@@ -243,6 +243,10 @@ artifacts {
     archives sourcesJar
 }
 
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
