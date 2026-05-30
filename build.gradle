@@ -253,9 +253,16 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact deobfJar
-            groupId = project.group     // 使用变量，不写死
+            groupId = project.group
             artifactId = project.archivesBaseName
-            version = project.version   // 使用变量，不写死
+            version = project.version
+
+            // 过滤掉 forgeBin 这种没有 groupId 的依赖
+            pom.withXml {
+                asNode().dependencies.dependency.findAll {
+                    it.groupId.text().isEmpty()
+                }.each { asNode().dependencies.remove(it) }
+            }
         }
     }
 }
