@@ -262,8 +262,11 @@ publishing {
 				def depsNode = asNode().get("dependencies")
 				if (depsNode.size() > 0) {
 					depsNode[0].children().removeAll { dep ->
-						dep instanceof Node && dep.name().localPart == "dependency" &&
-						dep.get("groupId").size() > 0 && dep.get("groupId")[0].text().isEmpty()
+						if (!(dep instanceof Node)) return false
+						if (dep.name().localPart != "dependency") return false
+						def groupIdNodes = dep.get("groupId")
+						// 删除：没有 groupId 节点，或者 groupId 内容为空
+						return groupIdNodes.isEmpty() || groupIdNodes[0].text().trim().isEmpty()
 					}
 				}
 			}
