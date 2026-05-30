@@ -128,8 +128,8 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
         }
 
         // World Settings 按钮点击 → 打开 GuiWorldSettings
-        // @Optional.Method 保证了即使 CreateWorldUI 没装，GuiWorldSettings 也能安全加载
-        if (button.id == WORLD_SETTINGS_BUTTON_ID && button.enabled) {
+        // 双重检查：确保 CreateWorldUI 已加载才尝试实例化 GuiWorldSettings
+        if (button.id == WORLD_SETTINGS_BUTTON_ID && button.enabled && DifficultyLocker.isCreateWorldUILoaded()) {
             mc.displayGuiScreen(new GuiWorldSettings((GuiOptions)(Object)this, this.field_146443_h));
             return;
         }
