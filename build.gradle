@@ -246,3 +246,16 @@ artifacts {
     archives deobfJar
     archives sourcesJar
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact deobfJar
+            groupId = project.group     // 使用变量，不写死
+            artifactId = project.archivesBaseName
+            version = project.version   // 使用变量，不写死
+        }
+    }
+}
