@@ -1,7 +1,4 @@
-
-// === === === === === === Mixin Path Start === === === === === ===
-
-repositories {
+﻿repositories {
     maven {
         url 'https://jitpack.io'
     }
@@ -43,5 +40,3 @@ tasks.compileJava.options.compilerArgs += ["-AreobfSrgFile=${tasks.reobf.srg}", 
 reobf {
     addExtraSrgFile outSrgFile
 }
-
-// === === === === === === Mixin Path End === === === === === ===

@@ -1,4 +1,4 @@
-buildscript {
+﻿buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
@@ -13,6 +13,10 @@ buildscript {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+        maven {
+            name = 'Aliyun'
+            url = 'https://maven.aliyun.com/repository/public/'
+        }
     }
 
     dependencies {
@@ -24,12 +28,11 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-
 apply plugin: 'forge'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 if (project.enableUsingKotlin.toBoolean()) {
     apply plugin: 'kotlin'
@@ -63,12 +66,6 @@ repositories {
     }
 
     maven {
-        name "Amarok Maven"
-        url "http://maven.snowlyicewolf.club/maven/"
-        allowInsecureProtocol true
-    }
-
-    maven {
         name "Curse Maven"
         url "https://cursemaven.com"
     }
@@ -76,11 +73,6 @@ repositories {
     maven {
         name "Modrinth Maven"
         url "https://api.modrinth.com/maven"
-    }
-
-    maven {
-        name "JitPack"
-        url "https://jitpack.io"
     }
 }
 
@@ -94,23 +86,45 @@ dependencies {
         implementation "curse.maven:MysteriumLib-645051:3963822"
     }
 
-    if (project.usePineappleClub.toBoolean()) {
-        implementation "club.someoneice.pineapplepsychic:pineapple-psychic:${project.psychic_version}"
-        implementation "club.someoneice.togocup.pineapple_tag:pineapple-tag:${project.tags_version}"
-        implementation "club.someoneice.togocup.recipebook:PineappleRecipeBook:${project.recipe_book_version}"
-    }
-
-
-    if (project.useNEI.toBoolean()) {
-        implementation "maven.modrinth:notenoughitems-unofficial:${project.nei_version}-GTNH"
-        implementation "maven.modrinth:codechickencore-unofficial:${project.cc_version}"
-        implementation "maven.modrinth:codechickenlib-unofficial:${project.cc_version}"
-    }
-
-    implementation "com.github.song682:CreateWorldUI:5.1.1"
+    implementation "maven.modrinth:notenoughitems-unofficial:${project.nei_version}-GTNH"
+    implementation "maven.modrinth:codechickencore-unofficial:${project.cc_version}"
+    implementation "maven.modrinth:codechickenlib-unofficial:${project.cc_version}"
 
     implementation fileTree(dir: 'lib', includes: ['*.jar'])
 }
+
+def dependenciesList = []
+if (!project.modDependencies.isEmpty()) dependenciesList.add(project.modDependencies)
+if (project.enableUsingMysteriumLib.toBoolean()) dependenciesList.add("\"required-after:MysteriumLib\"")
+
+// === === === 自动版本管理逻辑 === === ===
+
+def extractVersionFromTags() {
+    def tagsFilePath = project.hasProperty("tags_file_path") ? project.tags_file_path : null
+    if (tagsFilePath == null) {
+        throw new GradleException("tags_file_path not found in gradle.properties ")
+    }
+
+
+    def tagsFile = file(tagsFilePath)
+    if (!tagsFile.exists()) {
+        throw new GradleException("Tags.java not find in ${tagsFile}")
+    }
+
+
+    def versionPattern = ~/VERSION\s*=\s*"([^"]+)"/
+    def match = versionPattern.matcher(tagsFile.text)
+    if (match.find()) {
+        return match.group(1)
+    } else {
+        throw new GradleException("Definition VERSION not find in Tags.java ")
+    }
+}
+
+ext.modVersion = extractVersionFromTags()
+project.version = modVersion
+
+println ">>> Automativally read ${modVersion} from ${project.tags_file_path} "
 
 processResources {
     inputs.property "modversion", project.version
@@ -119,17 +133,22 @@ processResources {
     inputs.property "modname", project.modName
     inputs.property "modid", project.modId
 
+    inputs.property "url", project.url
+    inputs.property "authorList", [project.authorList]
+    inputs.property "logo", project.logo
+    inputs.property "dependencies", dependenciesList
+
     filesMatching("mcmod.info") {
         expand  'modversion': project.version,
                 'mcversion': project.minecraft.version,
                 'moddescription': project.modDescription,
                 'modname': project.modName,
-                'modid': project.modId
+                'modid': project.modId,
+                'url': project.url,
+                'authorList': [project.authorList],
+                'logo': project.logo,
+                'dependencies': dependenciesList
     }
-}
-
-jar {
-    from file("./LICENSE")
 }
 
 if (project.enableUsingMixin.toBoolean()) {
@@ -158,6 +177,7 @@ tasks.withType(Jar).configureEach {
     compileJava.options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation" << "-Xlint:all"
 }
 
+
 allprojects {
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile).tap {
@@ -167,6 +187,7 @@ allprojects {
         }
     }
 }
+
 
 if (project.enableUsingKotlin.toBoolean()) {
     compileKotlin {
@@ -180,4 +201,48 @@ if (project.enableUsingKotlin.toBoolean()) {
             jvmTarget = "1.8"
         }
     }
+}
+
+tasks.register('deobfJar', Jar) {
+    dependsOn reobf
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    classifier 'deobf'
+
+    from sourceSets.main.output
+    manifest.attributes(jar.manifest.getAttributes())
+}
+
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    classifier 'deobf-sources'
+
+    from sourceSets.main.allSource
+    exclude "assets"
+    exclude "methods.bin"
+    exclude "McpToSrg.csv"
+}
+
+tasks.register("updateGradleProperties") {
+    doLast {
+        def propsFile = file("gradle.properties")
+        if (!propsFile.exists()) {
+            throw new GradleException("gradle.properties Not Found")
+        }
+
+
+        def updated = propsFile.text.replaceAll(/modVersion\s*=.*\n/, "modVersion=${modVersion}\n")
+        propsFile.text = updated
+        println ">>> Have upgraded modVersion=${modVersion} from gradle.properties"
+    }
+}
+
+
+tasks.named("build").configure {
+    dependsOn("updateGradleProperties")
+}
+
+artifacts {
+    archives deobfJar
+    archives sourcesJar
 }
