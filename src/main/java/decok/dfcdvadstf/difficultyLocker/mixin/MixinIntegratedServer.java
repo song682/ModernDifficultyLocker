@@ -1,8 +1,11 @@
 package decok.dfcdvadstf.difficultyLocker.mixin;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.event.FMLInterModComms;
+import decok.dfcdvadstf.difficultyLocker.DifficultyLocker;
 import decok.dfcdvadstf.difficultyLocker.WorldDifficultyData;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.world.EnumDifficulty;
@@ -101,6 +104,12 @@ public abstract class MixinIntegratedServer {
                 mc.gameSettings.difficulty = lockedDifficulty;
                 mc.gameSettings.saveOptions();
             }
+            
+            // IMC: 通知 CreateWorldUI 锁定难度已应用
+            NBTTagCompound imcTag = new NBTTagCompound();
+            imcTag.setInteger("difficultyId", data.getLockedDifficulty());
+            FMLInterModComms.sendRuntimeMessage(DifficultyLocker.class, "createworldui", "world_lock_applied", imcTag);
+            difficultyLocker$logger.info("Sent runtime IMC: world_lock_applied, difficulty={}", data.getLockedDifficulty());
         }
     }
 
