@@ -74,6 +74,11 @@ repositories {
         name "Modrinth Maven"
         url "https://api.modrinth.com/maven"
     }
+
+    maven {
+        name "JitPack"
+        url "https://jitpack.io/"
+    }
 }
 
 dependencies {
@@ -87,6 +92,8 @@ dependencies {
     }
 
     implementation fileTree(dir: 'lib', includes: ['*.jar'])
+
+
 }
 
 def dependenciesList = []
