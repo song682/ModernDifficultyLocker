@@ -92,8 +92,7 @@ dependencies {
     }
 
     implementation fileTree(dir: 'lib', includes: ['*.jar'])
-
-
+    implementation "com.github.song682:CreateWorldUI:v7.0.0"
 }
 
 def dependenciesList = []
