@@ -23,6 +23,8 @@ public class WorldDifficultyData {
     // 当前存档的锁定状态
     private boolean locked = false;
     private int lockedDifficulty = 2; // 默认普通难度 (0=和平, 1=简单, 2=普通, 3=困难)
+    // 未锁定世界的每存档难度快照（-1 = 尚未记录，加载时不覆盖游戏默认难度）
+    private int currentDifficulty = -1;
     private String currentWorldName = "";
     
     // 单例实例
@@ -45,6 +47,7 @@ public class WorldDifficultyData {
         this.currentWorldName = worldName;
         this.locked = false;
         this.lockedDifficulty = 2; // 默认普通难度
+        this.currentDifficulty = -1;
         this.isHardcoreMode = false;
         
         if (saveHandler == null) {
@@ -61,8 +64,10 @@ public class WorldDifficultyData {
                 this.locked = nbt.getBoolean("Locked");
                 this.lockedDifficulty = nbt.getInteger("LockedDifficulty");
                 this.isHardcoreMode = nbt.getBoolean("IsHardcoreMode"); // 读取HardCore标记
-                LOGGER.info("Loaded difficulty data for world '{}': locked={}, difficulty={}, hardcore={}", 
-                    worldName, locked, lockedDifficulty, isHardcoreMode);
+                // 读取每存档难度快照（旧存档没有此键时保持 -1，表示不覆盖游戏默认）
+                this.currentDifficulty = nbt.hasKey("CurrentDifficulty") ? nbt.getInteger("CurrentDifficulty") : -1;
+                LOGGER.info("Loaded difficulty data for world '{}': locked={}, difficulty={}, current={}, hardcore={}", 
+                    worldName, locked, lockedDifficulty, currentDifficulty, isHardcoreMode);
             } else {
                 LOGGER.info("No difficulty data found for world '{}', using defaults", worldName);
             }
@@ -90,6 +95,7 @@ public class WorldDifficultyData {
             NBTTagCompound nbt = new NBTTagCompound();
             nbt.setBoolean("Locked", locked);
             nbt.setInteger("LockedDifficulty", lockedDifficulty);
+            nbt.setInteger("CurrentDifficulty", currentDifficulty); // 保存每存档难度快照
             nbt.setBoolean("IsHardcoreMode", isHardcoreMode); // 保存HardCore标记
             
             CompressedStreamTools.writeCompressed(nbt, new FileOutputStream(dataFile));
@@ -107,6 +113,7 @@ public class WorldDifficultyData {
         this.currentWorldName = "";
         this.locked = false;
         this.lockedDifficulty = 2;
+        this.currentDifficulty = -1;
         this.isHardcoreMode = false;
     }
     
@@ -138,6 +145,29 @@ public class WorldDifficultyData {
         if (difficulty != null) {
             this.lockedDifficulty = difficulty.getDifficultyId();
         }
+    }
+    
+    // ===== 每存档难度快照（未锁定世界的难度持久化）=====
+    
+    public int getCurrentDifficulty() {
+        return currentDifficulty;
+    }
+    
+    public void setCurrentDifficulty(int difficulty) {
+        if (difficulty >= 0 && difficulty <= 3) {
+            this.currentDifficulty = difficulty;
+        }
+    }
+    
+    /**
+     * 是否存在有效的每存档难度记录（全新世界返回 false，加载时不应覆盖游戏默认难度）
+     */
+    public boolean hasCurrentDifficulty() {
+        return currentDifficulty >= 0 && currentDifficulty <= 3;
+    }
+    
+    public EnumDifficulty getCurrentDifficultyEnum() {
+        return EnumDifficulty.getDifficultyEnum(currentDifficulty);
     }
     
     public String getCurrentWorldName() {

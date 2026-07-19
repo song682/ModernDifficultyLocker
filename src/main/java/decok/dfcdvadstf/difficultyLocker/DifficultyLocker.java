@@ -10,11 +10,10 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.event.FMLInterModComms;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 
@@ -68,10 +67,14 @@ public class DifficultyLocker {
     @Mod.EventHandler
     public void onServerStarting(FMLServerStartingEvent event) {
         // 服务器启动时加载世界难度数据
-        if (event.getServer() != null) {
+        // 复用正在运行世界的 SaveHandler，避免用 getSaveLoader() 新建实例覆盖 session.lock，
+        // 否则会导致存盘失败、难度丢失以及存档列表排序异常
+        MinecraftServer server = event.getServer();
+        if (server != null && server.worldServers != null && server.worldServers.length > 0
+            && server.worldServers[0] != null) {
             WorldDifficultyData.getInstance().loadWorldData(
-                event.getServer().getActiveAnvilConverter().getSaveLoader(event.getServer().getFolderName(), false),
-                event.getServer().getFolderName()
+                server.worldServers[0].getSaveHandler(),
+                server.getFolderName()
             );
         }
     }

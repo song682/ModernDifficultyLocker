@@ -230,10 +230,14 @@ public class GuiWorldSettings extends GuiScreen implements GuiYesNoCallback {
     }
 
     private void saveWorldData() {
-        if (mc.getIntegratedServer() != null) {
+        // 复用正在运行世界的 SaveHandler，切勿再用 getSaveLoader() 新建实例，
+        // 否则新建时的 setSessionLock() 会覆盖 session.lock，导致后续存盘中止、难度/排序数据丢失。
+        if (mc.getIntegratedServer() != null
+            && mc.getIntegratedServer().worldServers != null
+            && mc.getIntegratedServer().worldServers.length > 0
+            && mc.getIntegratedServer().worldServers[0] != null) {
             WorldDifficultyData.getInstance().saveWorldData(
-                mc.getIntegratedServer().getActiveAnvilConverter()
-                    .getSaveLoader(mc.getIntegratedServer().getFolderName(), false));
+                mc.getIntegratedServer().worldServers[0].getSaveHandler());
         }
     }
 

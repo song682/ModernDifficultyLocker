@@ -87,10 +87,7 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
                 data.setHardcoreMode(true);
                 isLocked = true;
                 // 保存HardCore模式的锁定状态
-                if (mc.getIntegratedServer() != null) {
-                    data.saveWorldData(mc.getIntegratedServer().getActiveAnvilConverter()
-                        .getSaveLoader(mc.getIntegratedServer().getFolderName(), false));
-                }
+                difficultyLocker$saveCurrentWorldData();
             }
 
             int originalWidth = difficultyLocker$difficultyButton.width;
@@ -178,10 +175,7 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
                 data.setLocked(true);
                 data.setLockedDifficulty(mc.gameSettings.difficulty);
                 
-                if (mc.getIntegratedServer() != null) {
-                    data.saveWorldData(mc.getIntegratedServer().getActiveAnvilConverter()
-                        .getSaveLoader(mc.getIntegratedServer().getFolderName(), false));
-                }
+                difficultyLocker$saveCurrentWorldData();
 
                 if (difficultyLocker$difficultyButton != null) {
                     difficultyLocker$difficultyButton.enabled = false;
@@ -209,10 +203,7 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             if (confirmed) {
                 data.setLocked(false);
                 
-                if (mc.getIntegratedServer() != null) {
-                    data.saveWorldData(mc.getIntegratedServer().getActiveAnvilConverter()
-                        .getSaveLoader(mc.getIntegratedServer().getFolderName(), false));
-                }
+                difficultyLocker$saveCurrentWorldData();
 
                 if (difficultyLocker$difficultyButton != null) {
                     difficultyLocker$difficultyButton.enabled = true;
@@ -232,6 +223,24 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             if (mc != null) {
                 mc.displayGuiScreen(this);
             }
+        }
+    }
+
+    /**
+     * 复用正在运行世界的 SaveHandler 保存难度数据。
+     * 绝不能用 getSaveLoader() 新建 SaveHandler，否则其构造函数的 setSessionLock()
+     * 会覆盖存档的 session.lock，导致后续存盘 checkSessionLock 失败而中止
+     * （难度丢失、存档列表排序错乱）。
+     */
+    @Unique
+    private void difficultyLocker$saveCurrentWorldData() {
+        Minecraft mc = FMLClientHandler.instance().getClient();
+        if (mc.getIntegratedServer() != null
+            && mc.getIntegratedServer().worldServers != null
+            && mc.getIntegratedServer().worldServers.length > 0
+            && mc.getIntegratedServer().worldServers[0] != null) {
+            WorldDifficultyData.getInstance().saveWorldData(
+                mc.getIntegratedServer().worldServers[0].getSaveHandler());
         }
     }
 
