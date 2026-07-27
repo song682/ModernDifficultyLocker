@@ -4,7 +4,7 @@ import cpw.mods.fml.common.Optional;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleApplier;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleMonitorNSetter;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleMonitorNSetter.GameruleValue;
-import decok.dfcdvadstf.createworldui.gamerule.GuiScreenGameRuleEditor;
+import decok.dfcdvadstf.createworldui.ui.gamerule.IngameGameRuleScreen;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiOptionButton;
@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiYesNoCallback;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import java.util.ArrayList;
@@ -173,13 +174,29 @@ public class GuiWorldSettings extends GuiScreen implements GuiYesNoCallback {
     @Optional.Method(modid = "createworldui")
     private void openGameRuleEditor() {
         Map<String, String> currentRules = new HashMap<>();
-        if (mc.theWorld != null) {
-            Map<String, GameruleValue> allRules = GameRuleMonitorNSetter.getAllGamerules(mc.theWorld);
+        // 必须从服务端世界读取规则：1.7.10 没有 GameRules 的服务端→客户端同步机制，
+        // WorldClient 的副本永远只有 9 条原版规则，模组新增的规则只存在于服务端世界。
+        // Must read rules from the SERVER-side world: 1.7.10 has no server-to-client
+        // GameRules sync, so the WorldClient copy only ever holds the 9 vanilla rules;
+        // mod-added rules exist solely in the server world.
+        World ruleSource = null;
+        if (mc.getIntegratedServer() != null
+            && mc.getIntegratedServer().worldServers != null
+            && mc.getIntegratedServer().worldServers.length > 0
+            && mc.getIntegratedServer().worldServers[0] != null) {
+            ruleSource = mc.getIntegratedServer().worldServers[0];
+        }
+        // 兜底：无集成服务端（如远程服务器）时退回客户端副本 / Fallback: use the client copy when no integrated server (e.g. remote server)
+        if (ruleSource == null) {
+            ruleSource = mc.theWorld;
+        }
+        if (ruleSource != null) {
+            Map<String, GameruleValue> allRules = GameRuleMonitorNSetter.getAllGamerules(ruleSource);
             for (Map.Entry<String, GameruleValue> entry : allRules.entrySet()) {
                 currentRules.put(entry.getKey(), entry.getValue().stringValue);
             }
         }
-        mc.displayGuiScreen(new GuiScreenGameRuleEditor(this, currentRules));
+        mc.displayGuiScreen(new IngameGameRuleScreen(this, currentRules));
     }
 
     /**
