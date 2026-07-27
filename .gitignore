@@ -13,6 +13,7 @@ out
 *.iml
 .idea
 idea
+.qoder
 
 # gradle
 build
@@ -25,4 +26,6 @@ run
 
 # Files from Forge MDK
 forge*changelog.txt
-.gitattributes
+
+# Wiki
+Mixin
