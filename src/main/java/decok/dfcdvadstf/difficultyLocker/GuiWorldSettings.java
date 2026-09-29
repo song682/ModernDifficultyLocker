@@ -365,4 +365,14 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
         // Disabled-button tooltips are pumped by each widget's WidgetTooltipHolder and drawn
         // deferred by CatFrame at the end of the frame.
     }
+
+    @Override
+    public void keyTyped(char typedChar, int keyCode) {
+        super.keyTyped(typedChar, keyCode);
+    }
+
+    @Override
+    public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
 }
