@@ -1,4 +1,4 @@
-package decok.dfcdvadstf.difficultyLocker.mixin;
+package decok.dfcdvadstf.difficultyLocker.mixin.middle;
 
 import decok.dfcdvadstf.difficultyLocker.DifficultyLocker;
 import decok.dfcdvadstf.difficultyLocker.GuiLockButton;

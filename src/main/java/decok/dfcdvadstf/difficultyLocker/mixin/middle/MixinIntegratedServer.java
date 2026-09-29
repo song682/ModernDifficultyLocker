@@ -1,4 +1,4 @@
-package decok.dfcdvadstf.difficultyLocker.mixin;
+package decok.dfcdvadstf.difficultyLocker.mixin.middle;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLInterModComms;

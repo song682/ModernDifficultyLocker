@@ -1,5 +1,6 @@
 package decok.dfcdvadstf.difficultyLocker.mixin;
 
+import com.gtnewhorizon.gtnhmixins.builders.IMixins;
 import decok.dfcdvadstf.difficultyLocker.Tags;
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -32,10 +33,7 @@ public class DifficultyLockerMixin implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        return Arrays.asList(
-                "MixinGuiOptions",
-                "MixinIntegratedServer"
-        );
+        return IMixins.getMixins(Mixins.class);
     }
 
     @Override
