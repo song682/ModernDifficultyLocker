@@ -22,11 +22,11 @@ import org.lwjgl.opengl.GL11;
  * built-in {@code ImageButton}.
  * </p>
  */
-public class CatFrameLockButton extends Button {
+public class LockButton extends Button {
     private static final ResourceLocation LOCK_TEXTURES = new ResourceLocation("difficultylocker", "textures/gui/lock_button.png");
     private boolean locked;
 
-    public CatFrameLockButton(int x, int y, boolean locked, OnPress onPress) {
+    public LockButton(int x, int y, boolean locked, OnPress onPress) {
         super(x, y, 20, 20, Text.literal(""), onPress);
         this.locked = locked;
     }

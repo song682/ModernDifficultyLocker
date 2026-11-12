@@ -91,8 +91,7 @@ dependencies {
     runtimeOnly "maven.modrinth:codechickenlib-unofficial:${project.cc_version}"
 
     compileOnly "com.github.song682:CreateWorldUI:v7.1.1"
-    implementation "com.github.song682:CatFrame:v0.9.3"
-
+    implementation "com.github.song682:CatFrame:v0.10.11"
     implementation fileTree(dir: 'lib', includes: ['*.jar'])
 }
 

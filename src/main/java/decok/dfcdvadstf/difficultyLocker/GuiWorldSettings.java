@@ -50,7 +50,7 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
     private final GameSettings gameSettings;
 
     private Button difficultyButton;
-    private CatFrameLockButton lockButton;
+    private LockButton lockButton;
     private Button gameRulesButton;
 
     private boolean pendingLockState = false;
@@ -98,7 +98,7 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
 
         // === 锁定按钮（难度按钮右侧） ===
         int lockBtnX = diffBtnX + 128 + 2; // 2px间距
-        lockButton = new CatFrameLockButton(lockBtnX, diffBtnY, isLocked, btn -> handleLockButtonClick());
+        lockButton = new LockButton(lockBtnX, diffBtnY, isLocked, btn -> handleLockButtonClick());
 
         if (isHardcore) {
             lockButton.setActive(false);

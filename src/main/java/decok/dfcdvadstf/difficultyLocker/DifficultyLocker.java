@@ -21,12 +21,11 @@ import com.google.common.collect.ImmutableList;
     modid = Tags.MODID,
     name = Tags.NAME,
     version = Tags.VERSION,
-    acceptedMinecraftVersions = "[1.7.10]",
     useMetadata = true,
-    dependencies = "reqeuired-after:catframe[0.9.3,)",
+    dependencies = "required-after:catframe@[0.10.11,)",
     customProperties = {
             @Mod.CustomProperty(k = "license", v = "MIT"),
-            @Mod.CustomProperty(k = "issueTrackerUrl", v = "https://github.com/song682/CatFrame/issues"),
+            @Mod.CustomProperty(k = "issueTrackerUrl", v = "https://github.com/song682/ModernDifficultyLocker/issues"),
             @Mod.CustomProperty(k = "iconFile", v = "assets/difficultylocker/textures/gui/locked.png")
     }
 )
