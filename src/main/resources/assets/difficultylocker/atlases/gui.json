@@ -1,9 +1,9 @@
 {
-  "sources": [
-    {
-      "type": "minecraft:directory",
-      "source": "gui",
-      "prefix": "gui/"
-    }
-  ]
+    "sources": [
+        {
+            "type": "minecraft:directory",
+            "source": "gui",
+            "prefix": "gui/"
+        }
+    ]
 }

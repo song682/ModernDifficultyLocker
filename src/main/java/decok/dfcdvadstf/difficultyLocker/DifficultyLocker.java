@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableList;
     name = Tags.NAME,
     version = Tags.VERSION,
     useMetadata = true,
-    dependencies = "required-after:catframe@[0.10.11,)",
+    dependencies = "required-after:catframe@[0.10.11,);required-after:catframe_compat@[0.0.11,)",
     customProperties = {
             @Mod.CustomProperty(k = "license", v = "MIT"),
             @Mod.CustomProperty(k = "issueTrackerUrl", v = "https://github.com/song682/ModernDifficultyLocker/issues"),
