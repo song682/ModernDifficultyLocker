@@ -93,6 +93,7 @@ dependencies {
     compileOnly "com.github.song682:CreateWorldUI:v7.1.1"
     implementation "com.github.song682:CatFrame:${project.cf_ver}"
     implementation "com.github.song682:CatFrame-Compat:${project.cfc_ver}"
+    implementation "com.github.song682:jar-utils:0.0.3"
     implementation fileTree(dir: 'lib', includes: ['*.jar'])
 }
 
