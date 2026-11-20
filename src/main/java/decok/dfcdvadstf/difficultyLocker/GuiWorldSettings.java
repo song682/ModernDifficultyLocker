@@ -72,10 +72,9 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
 
         // 如果是HardCore模式，确保锁定状态
         if (isHardcore && !isLocked) {
+            // setHardcoreMode 内部 markDirty，由世界下一次存盘写入
             data.setHardcoreMode(true);
             isLocked = true;
-            // 保存HardCore模式的锁定状态
-            saveWorldData();
         }
 
         // === 难度按钮（左侧，缩小宽度给锁定按钮腾空间） ===
@@ -234,7 +233,6 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
             if (confirmed) {
                 data.setLocked(true);
                 data.setLockedDifficulty(mc.gameSettings.difficulty);
-                saveWorldData();
 
                 if (difficultyButton != null) difficultyButton.setActive(false);
                 if (lockButton != null) {
@@ -256,7 +254,6 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
             
             if (confirmed) {
                 data.setLocked(false);
-                saveWorldData();
 
                 if (difficultyButton != null) difficultyButton.setActive(true);
                 if (lockButton != null) {
@@ -266,18 +263,6 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
                 playClickSound();
             }
             mc.displayGuiScreen(this);
-        }
-    }
-
-    private void saveWorldData() {
-        // 复用正在运行世界的 SaveHandler，切勿再用 getSaveLoader() 新建实例，
-        // 否则新建时的 setSessionLock() 会覆盖 session.lock，导致后续存盘中止、难度/排序数据丢失。
-        if (mc.getIntegratedServer() != null
-            && mc.getIntegratedServer().worldServers != null
-            && mc.getIntegratedServer().worldServers.length > 0
-            && mc.getIntegratedServer().worldServers[0] != null) {
-            WorldDifficultyData.getInstance().saveWorldData(
-                mc.getIntegratedServer().worldServers[0].getSaveHandler());
         }
     }
 

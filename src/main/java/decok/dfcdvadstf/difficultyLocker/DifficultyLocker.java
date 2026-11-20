@@ -72,22 +72,20 @@ public class DifficultyLocker {
     @Mod.EventHandler
     public void onServerStarting(FMLServerStartingEvent event) {
         // 服务器启动时加载世界难度数据
-        // 复用正在运行世界的 SaveHandler，避免用 getSaveLoader() 新建实例覆盖 session.lock，
-        // 否则会导致存盘失败、难度丢失以及存档列表排序异常
+        // 从运行中世界的 MapStorage 读取，数据落盘复用该世界既有的 SaveHandler，
+        // 避免用 getSaveLoader() 新建实例覆盖 session.lock，否则会导致存盘失败、
+        // 难度丢失以及存档列表排序异常
         MinecraftServer server = event.getServer();
         if (server != null && server.worldServers != null && server.worldServers.length > 0
             && server.worldServers[0] != null) {
-            WorldDifficultyData.getInstance().loadWorldData(
-                server.worldServers[0].getSaveHandler(),
-                server.getFolderName()
-            );
+            WorldDifficultyData.loadWorldData(server.worldServers[0], server.getFolderName());
         }
     }
     
     @Mod.EventHandler
     public void onServerStopping(FMLServerStoppingEvent event) {
-        // 服务器停止时保存世界难度数据
-        WorldDifficultyData.getInstance().clearWorldData();
+        // 解除绑定：数据仍在世界 MapStorage 中，随最后的世界存盘写入
+        WorldDifficultyData.unloadWorldData();
     }
     
     // ===== Runtime IMC 轮询 =====
@@ -123,6 +121,7 @@ public class DifficultyLocker {
                 
                 if (locked && diffId >= 0 && diffId <= 3) {
                     WorldDifficultyData data = WorldDifficultyData.getInstance();
+                    // setter 内部 markDirty，交给世界下一次存盘写入
                     data.setLocked(true);
                     data.setLockedDifficulty(diffId);
                     LOGGER.info("IMC: Synced world_created lock state to WorldDifficultyData");

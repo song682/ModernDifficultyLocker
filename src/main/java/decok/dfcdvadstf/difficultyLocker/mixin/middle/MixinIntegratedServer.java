@@ -11,7 +11,6 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.storage.ISaveHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,7 +69,6 @@ public abstract class MixinIntegratedServer {
                                   WorldType type,
                                   String generatorOptions, CallbackInfo ci) {
 
-        WorldDifficultyData data = WorldDifficultyData.getInstance();
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
         if (server.worldServers == null || server.worldServers.length == 0 || server.worldServers[0] == null) {
@@ -78,21 +76,19 @@ public abstract class MixinIntegratedServer {
             return;
         }
 
-        // 复用正在运行世界的 SaveHandler，绝不能再用 getSaveLoader() 新建实例，
-        // 否则新建时的 setSessionLock() 会覆盖 session.lock，令后续存盘失败。
-        ISaveHandler saveHandler = server.worldServers[0].getSaveHandler();
-
-        // 加载世界难度数据（原本在 startServer 中进行，因当时 SaveHandler 尚不存在而移到此处）
-        data.loadWorldData(saveHandler, difficultyLocker$worldName);
+        // 从运行中世界的 MapStorage 载入难度数据：复用该世界既有的 SaveHandler，
+        // 绝不能再用 getSaveLoader() 新建实例，否则新建时的 setSessionLock() 会覆盖 session.lock，
+        // 令后续存盘失败。
+        // 原本在 startServer 中进行，因当时 SaveHandler 尚不存在而移到此处。
+        WorldDifficultyData.loadWorldData(server.worldServers[0], difficultyLocker$worldName);
+        WorldDifficultyData data = WorldDifficultyData.getInstance();
 
         // 检测是否为HardCore模式
         boolean isHardcore = server.worldServers[0].getWorldInfo().isHardcoreModeEnabled();
 
-        // 如果是HardCore模式，设置自动锁定
+        // 如果是HardCore模式，设置自动锁定（setter 内部 markDirty，随世界存盘写入）
         if (isHardcore) {
             data.setHardcoreMode(true);
-            // 保存HardCore模式的锁定状态（复用同一个 SaveHandler）
-            data.saveWorldData(saveHandler);
         }
 
         if (data.isLocked()) {
@@ -154,14 +150,14 @@ public abstract class MixinIntegratedServer {
     private void onInitiateShutdown(CallbackInfo ci) {
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 
-        // 保存世界难度数据：复用正在运行世界的 SaveHandler，避免新建 SaveHandler 覆盖 session.lock。
+        // 保存世界难度数据：数据由世界 MapStorage 持有，解除绑定后随 stopServer 的
+        // 最后一次 saveAllWorlds 写入（写盘前已 checkSessionLock，不会污染 session.lock）。
         // 否则退出前的最后一次存盘会因 checkSessionLock 失败而中止，导致 LastPlayed 不更新 →
         // 存档列表排序退化成创建顺序，且本局难度修改无法持久化。
         if (server.worldServers != null && server.worldServers.length > 0 && server.worldServers[0] != null) {
             WorldDifficultyData data = WorldDifficultyData.getInstance();
             // 退出前快照当前世界难度，实现每存档难度持久化（未锁定世界重进后不再变回默认）
             data.setCurrentDifficulty(server.worldServers[0].difficultySetting.getDifficultyId());
-            data.saveWorldData(server.worldServers[0].getSaveHandler());
         } else {
             difficultyLocker$logger.warn("worldServers not available at shutdown, skip saving difficulty data for '{}'", difficultyLocker$worldName);
         }

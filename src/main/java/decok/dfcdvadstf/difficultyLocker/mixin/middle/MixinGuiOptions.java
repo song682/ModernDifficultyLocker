@@ -82,12 +82,10 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             boolean isLocked = data.isLocked();
             boolean isHardcore = mc.theWorld.getWorldInfo().isHardcoreModeEnabled();
 
-            // 如果是HardCore模式，确保锁定状态
+            // 如果是HardCore模式，确保锁定状态（setter 内部 markDirty，随世界存盘写入）
             if (isHardcore && !isLocked) {
                 data.setHardcoreMode(true);
                 isLocked = true;
-                // 保存HardCore模式的锁定状态
-                difficultyLocker$saveCurrentWorldData();
             }
 
             int originalWidth = difficultyLocker$difficultyButton.width;
@@ -174,8 +172,6 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             if (confirmed) {
                 data.setLocked(true);
                 data.setLockedDifficulty(mc.gameSettings.difficulty);
-                
-                difficultyLocker$saveCurrentWorldData();
 
                 if (difficultyLocker$difficultyButton != null) {
                     difficultyLocker$difficultyButton.enabled = false;
@@ -202,8 +198,6 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
         else if (id == 1002) {
             if (confirmed) {
                 data.setLocked(false);
-                
-                difficultyLocker$saveCurrentWorldData();
 
                 if (difficultyLocker$difficultyButton != null) {
                     difficultyLocker$difficultyButton.enabled = true;
@@ -223,24 +217,6 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
             if (mc != null) {
                 mc.displayGuiScreen(this);
             }
-        }
-    }
-
-    /**
-     * 复用正在运行世界的 SaveHandler 保存难度数据。
-     * 绝不能用 getSaveLoader() 新建 SaveHandler，否则其构造函数的 setSessionLock()
-     * 会覆盖存档的 session.lock，导致后续存盘 checkSessionLock 失败而中止
-     * （难度丢失、存档列表排序错乱）。
-     */
-    @Unique
-    private void difficultyLocker$saveCurrentWorldData() {
-        Minecraft mc = FMLClientHandler.instance().getClient();
-        if (mc.getIntegratedServer() != null
-            && mc.getIntegratedServer().worldServers != null
-            && mc.getIntegratedServer().worldServers.length > 0
-            && mc.getIntegratedServer().worldServers[0] != null) {
-            WorldDifficultyData.getInstance().saveWorldData(
-                mc.getIntegratedServer().worldServers[0].getSaveHandler());
         }
     }
 
