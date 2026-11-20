@@ -1,12 +1,12 @@
 {
     "difficulty.lock.confirm.title": "Зафиксировать сложность",
-    "difficulty.lock.confirm.line": "Вы действительно хотите зафиксировать сложность для этого мира? Будет установлена сложность $s, которую нельзя будет изменить.",
+    "difficulty.lock.confirm.line": "Вы действительно хотите зафиксировать сложность для этого мира? Будет установлена сложность %s, которую нельзя будет изменить.",
     "difficulty.unlock.confirm.title": "Разблокировать сложность",
     "difficulty.unlock.confirm.line": "Вы действительно хотите разблокировать сложность для этого мира? Будет установлена сложность, которая может быть изменена.",
     "difficultylocker.button.lockDifficulty": "Зафиксировать сложность",
-    "difficultylocker.button.locked": "已锁定",
-    "difficultylocker.button.unlocked": "未锁定",
+    "difficultylocker.button.locked": "Зафиксирована",
+    "difficultylocker.button.unlocked": "Не зафиксирована",
     "difficultylocker.worldsettings.title": "Настройки мира",
     "difficultylocker.worldsettings.button": "Настройки мира...",
-    "difficultylocker.gamerules.tooltip.needCheats": "需要启用作弊"
+    "difficultylocker.gamerules.tooltip.needCheats": "Требуется включить читы"
 }

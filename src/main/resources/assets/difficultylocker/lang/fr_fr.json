@@ -1,0 +1,12 @@
+{
+    "difficulty.lock.confirm.title": "Verrouiller la difficulté du monde",
+    "difficulty.lock.confirm.line": "Voulez-vous vraiment verrouiller la difficulté de ce monde ? La difficulté de ce monde sera fixée définitivement sur %s, et vous ne pourrez plus jamais la modifier.",
+    "difficulty.unlock.confirm.title": "Déverrouiller la difficulté du monde",
+    "difficulty.unlock.confirm.line": "Voulez-vous vraiment déverrouiller la difficulté de ce monde ? La difficulté pourra de nouveau être modifiée.",
+    "difficultylocker.button.lockDifficulty": "Verrouiller la difficulté",
+    "difficultylocker.button.locked": "Verrouillée",
+    "difficultylocker.button.unlocked": "Déverrouillée",
+    "difficultylocker.worldsettings.title": "Paramètres du monde",
+    "difficultylocker.worldsettings.button": "Paramètres du monde...",
+    "difficultylocker.gamerules.tooltip.needCheats": "Nécessite l'activation des triches"
+}

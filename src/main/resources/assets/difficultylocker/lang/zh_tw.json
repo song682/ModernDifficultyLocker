@@ -1,0 +1,12 @@
+{
+    "difficulty.lock.confirm.title": "鎖定世界難度",
+    "difficulty.lock.confirm.line": "你確定要鎖定這個世界的難度嗎？這會將這個世界的難度固定為%s，而且之後永遠無法再變更。",
+    "difficulty.unlock.confirm.title": "解鎖世界難度",
+    "difficulty.unlock.confirm.line": "你確定要取消世界難度鎖定嗎？這會解除鎖定，讓難度可以再次變更。",
+    "difficultylocker.button.lockDifficulty": "鎖定難度",
+    "difficultylocker.button.locked": "已鎖定",
+    "difficultylocker.button.unlocked": "未鎖定",
+    "difficultylocker.worldsettings.title": "世界選項",
+    "difficultylocker.worldsettings.button": "世界選項...",
+    "difficultylocker.gamerules.tooltip.needCheats": "需要啟用作弊"
+}
