@@ -4,6 +4,7 @@ import cpw.mods.fml.common.Optional;
 import decok.dfcdvadstf.catframe.ui.Text;
 import decok.dfcdvadstf.catframe.ui.components.Button;
 import decok.dfcdvadstf.catframe.ui.components.Tooltip;
+import decok.dfcdvadstf.catframe.ui.screens.ConfirmScreen;
 import decok.dfcdvadstf.catframe.ui.screens.Screen;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleApplier;
 import decok.dfcdvadstf.createworldui.api.gamerule.GameRuleMonitorNSetter;
@@ -32,7 +33,7 @@ import java.util.Map;
  *
  * 包含三个主要按钮：
  * - 左侧：难度选择按钮 + 难度锁定按钮
- * - 右侧：游戏规则编辑按钮（仅在创造模式+作弊模式下可用）
+ * - 右侧：游戏规则编辑按钮（仅在启用作弊/管理员模式下可用）
  *
  * <p>
  * World settings screen — used when ModernDifficultyLocker and CreateWorldUI are
@@ -111,16 +112,17 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
             btn -> openGameRuleEditor()
         ).pos(this.width / 2 + 5, diffBtnY).width(150).height(20).build();
 
-        // 仅在创造模式 + 作弊模式同时启用时可用
-        boolean isCreative = isCreativeMode();
+        // 仅需启用作弊（管理员模式）即可编辑游戏规则，与高版本行为一致；创造模式不是必要条件
+        // Only cheats (admin mode) are required to edit game rules, matching modern versions;
+        // creative mode is not a prerequisite.
         boolean cheatsEnabled = areCheatsEnabled();
-        if (isCreative && cheatsEnabled) {
+        if (cheatsEnabled) {
             gameRulesButton.setActive(true);
         } else {
             gameRulesButton.setActive(false);
             // 禁用原因通过 CatFrame 组件级 tooltip 说明（悬停时由 WidgetTooltipHolder 自动显示）
             // The disabled reason is conveyed via CatFrame's widget tooltip (auto-shown on hover).
-            gameRulesButton.setTooltip(Tooltip.create(buildGameRulesDisabledTooltip(isCreative, cheatsEnabled)));
+            gameRulesButton.setTooltip(Tooltip.create(buildGameRulesDisabledTooltip()));
         }
 
         // === 完成按钮 ===
@@ -158,7 +160,7 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
         if (!currentLocked) {
             // 锁定操作（需要确认）
             pendingLockState = true;
-            mc.displayGuiScreen(new GuiYesNo(this,
+            mc.displayGuiScreen(new ConfirmScreen(this,
                 I18n.format("difficulty.lock.confirm.title"),
                 I18n.format("difficulty.lock.confirm.line",
                     I18n.format(mc.gameSettings.difficulty.getDifficultyResourceKey())),
@@ -166,7 +168,7 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
         } else if (DifficultyLocker.config.allowUnlock) {
             // 解锁操作（需要确认）
             pendingLockState = false;
-            mc.displayGuiScreen(new GuiYesNo(this,
+            mc.displayGuiScreen(new ConfirmScreen(this,
                 I18n.format("difficulty.unlock.confirm.title"),
                 I18n.format("difficulty.unlock.confirm.line"),
                 1002));
@@ -177,14 +179,8 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
      * 构建游戏规则按钮的禁用原因 tooltip
      * Build the disabled-reason tooltip for the game-rules button.
      */
-    private String buildGameRulesDisabledTooltip(boolean isCreative, boolean cheatsEnabled) {
-        if (!isCreative && !cheatsEnabled) {
-            return I18n.format("difficultylocker.gamerules.tooltip.needCreativeAndCheats");
-        } else if (!isCreative) {
-            return I18n.format("difficultylocker.gamerules.tooltip.needCreative");
-        } else {
-            return I18n.format("difficultylocker.gamerules.tooltip.needCheats");
-        }
+    private String buildGameRulesDisabledTooltip() {
+        return I18n.format("difficultylocker.gamerules.tooltip.needCheats");
     }
 
     /**
@@ -307,15 +303,6 @@ public class GuiWorldSettings extends Screen implements GuiYesNoCallback {
         } catch (Exception e) {
             DifficultyLocker.LOGGER.error("Failed to apply pending game rules: {}", e.getMessage());
         }
-    }
-
-    private boolean isCreativeMode() {
-        try {
-            if (mc.theWorld != null && mc.theWorld.getWorldInfo() != null) {
-                return mc.theWorld.getWorldInfo().getGameType().isCreative();
-            }
-        } catch (Exception ignored) {}
-        return false;
     }
 
     private boolean areCheatsEnabled() {

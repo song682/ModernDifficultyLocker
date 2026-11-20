@@ -8,7 +8,5 @@
     "difficultylocker.button.unlocked": "Unlocked",
     "difficultylocker.worldsettings.title": "World Settings",
     "difficultylocker.worldsettings.button": "World Settings...",
-    "difficultylocker.gamerules.tooltip.needCreative": "Requires Creative mode",
-    "difficultylocker.gamerules.tooltip.needCheats": "Requires Cheats to be enabled",
-    "difficultylocker.gamerules.tooltip.needCreativeAndCheats": "Requires Creative mode and Cheats to be enabled"
+    "difficultylocker.gamerules.tooltip.needCheats": "Requires Cheats to be enabled"
 }

@@ -1,5 +1,6 @@
 package decok.dfcdvadstf.difficultyLocker.mixin.middle;
 
+import decok.dfcdvadstf.catframe.ui.screens.ConfirmScreen;
 import decok.dfcdvadstf.difficultyLocker.DifficultyLocker;
 import decok.dfcdvadstf.difficultyLocker.GuiLockButton;
 import decok.dfcdvadstf.difficultyLocker.GuiWorldSettings;
@@ -142,14 +143,14 @@ public abstract class MixinGuiOptions extends GuiScreen implements GuiYesNoCallb
 
             if (!currentLocked) {
                 difficultyLocker$pendingLockState = true;
-                mc.displayGuiScreen(new GuiYesNo(this,
+                mc.displayGuiScreen(new ConfirmScreen(this,
                     I18n.format("difficulty.lock.confirm.title"),
                     I18n.format("difficulty.lock.confirm.line", I18n.format(mc.gameSettings.difficulty.getDifficultyResourceKey())),
                     1001));
             }
             else if (DifficultyLocker.config.allowUnlock) {
                 difficultyLocker$pendingLockState = false;
-                mc.displayGuiScreen(new GuiYesNo(this,
+                mc.displayGuiScreen(new ConfirmScreen(this,
                     I18n.format("difficulty.unlock.confirm.title"),
                     I18n.format("difficulty.unlock.confirm.line"),
                     1002));
